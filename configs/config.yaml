@@ -1,0 +1,37 @@
+paths:
+  root: "."
+  data:
+    raw_genomics: "data/raw/genomics"
+    raw_pathology: "data/raw/pathology"
+    processed_genomics: "data/processed/genomics"
+    processed_pathology: "data/processed/pathology"
+    decoupled: "data/processed/decoupled"
+
+files:
+  clinical: "Cancer_clinical.csv"
+  mrna: "Cancer_mRNA.csv"
+  wsi_delete: "Cancer_WSI_delete.csv"
+  wsi_features: "Cancer_resnet50_features.h5"
+  wsi_patches: "Cancer_patches.h5"
+  decoupled_rep: "Cancer_decoupled_representations.h5"
+  decoupled_meta: "Cancer_decoupled_metadata.json"
+  checkpoint: "Cancer_best_model.pth"
+
+hyperparams:
+  variance_threshold: 0.5
+  cox_p_threshold: 0.01
+  n_top_genes: 1000
+  n_consensus: 200
+  n_exploration: 200
+  wsi_patches_per_group: 8
+  wsi_m_groups: 3
+  decoupled_common_dim: 256
+  decoupled_private_dim: 256
+  hg_k: 10
+  hg_hidden_dim: 128
+  hg_layers: 3
+  fusion_hidden_dim: 64
+  batch_size: 32
+  lr: 0.001
+  epochs: 100
+  patience: 10
