@@ -1,5 +1,3 @@
-import os
-import warnings
 from pathlib import Path
 import h5py
 import numpy as np

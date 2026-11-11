@@ -2,9 +2,7 @@ import copy
 import json
 import argparse
 import sys
-import warnings
 from pathlib import Path
-from typing import Dict, List, Tuple
 import h5py
 import numpy as np
 import pandas as pd
@@ -245,7 +243,6 @@ class HybridSurvivalCVTrainer:
         best_cindex = -float('inf')
         best_state = None
         no_improve = 0
-        history = []
         for epoch in range(self.epochs):
             model.train()
             risk_train = model(z_common_train_t, z_wsi_train_t, z_mrna_train_t, H_train_c, H_train_w, H_train_m, ew_train_c, ew_train_w, ew_train_m, times_train_t, events_train_t)
@@ -260,7 +257,6 @@ class HybridSurvivalCVTrainer:
             with torch.no_grad():
                 risk_val = model(z_common_val_t, z_wsi_val_t, z_mrna_val_t, H_val_c, H_val_w, H_val_m, ew_val_c, ew_val_w, ew_val_m, times_val_t, events_val_t)
                 cindex_val = self.compute_cindex(risk_val, times_val_t, events_val_t)
-            history.append({'epoch': epoch, 'train_loss': loss.item(), 'val_cindex': cindex_val})
             scheduler.step(cindex_val)
             if cindex_val > best_cindex + 0.001:
                 best_cindex = cindex_val
@@ -277,9 +273,7 @@ class HybridSurvivalCVTrainer:
         restored_cindex = self.compute_cindex(risk_val, times_val_t, events_val_t)
         if abs(restored_cindex - best_cindex) > 1e-12:
             raise RuntimeError('Best checkpoint prediction mismatch')
-        final_attn = model.last_attn_weights
-        final_opinions = {name: {'b_risk': op['b_risk'].mean().item(), 'uncertainty': op['u'].mean().item()} for (name, op) in model.last_opinions.items()}
-        return {'fold': fold, 'predictions': pd.DataFrame({'patient_id': np.asarray(self.valid_pids)[val_idx], 'fold': fold + 1, 'time': times_val, 'event': events_val, 'risk': risk_val.detach().cpu().numpy()}), 'best_cindex': best_cindex, 'history': history, 'final_attn_weights': final_attn, 'final_opinions': final_opinions}
+        return {'fold': fold, 'predictions': pd.DataFrame({'patient_id': np.asarray(self.valid_pids)[val_idx], 'fold': fold + 1, 'time': times_val, 'event': events_val, 'risk': risk_val.detach().cpu().numpy()}), 'best_cindex': best_cindex}
 
     def run_cv(self, output_dir=None, split_dir=None):
         if split_dir is None:
